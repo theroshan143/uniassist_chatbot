@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="UniAssist Admin Dashboard - Analytics, Tickets & Knowledge Base Management">
+    <title>UniAssist Admin - Management Portal</title>
+    <!-- Favicon: Inline SVG Data URI -->
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23c2410c'/%3E%3Cpath d='M16 7L6 12l10 5 10-5-10-5zm-7 8.5v4.2c0 2.4 3.1 4.3 7 4.3s7-1.9 7-4.3v-4.2l-7 3.5-7-3.5z' fill='%23ffffff'/%3E%3C/svg%3E" type="image/svg+xml">
+    <link rel="stylesheet" href="/static/style.css">
+    <!-- Chart.js for analytics visualization (CDN allowed) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+    <style>
+        /* Admin-specific styles inheriting warm Ask First design tokens */
+        body {
+            overflow-y: auto;
+            min-height: 100vh;
+        }
+        .admin-wrap {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: var(--sp-4) var(--sp-4) var(--sp-6);
+        }
+        .admin-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: var(--sp-3) var(--sp-4);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-card);
+            box-shadow: var(--shadow-sm);
+            margin-bottom: var(--sp-4);
+        }
+        .admin-header-left {
+            display: flex;
+            align-items: center;
+            gap: var(--sp-3);
+        }
+        .admin-title {
+            font-family: var(--font-heading);
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text);
+            line-height: 1.2;
+        }
+        .admin-sub {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+        .admin-header-actions {
+            display: flex;
+            align-items: center;
+            gap: var(--sp-2);
+        }
+        .kpi-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--sp-3);
+            margin-bottom: var(--sp-4);
+        }
+        .kpi-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-card);
+            padding: var(--sp-3) var(--sp-4);
+            box-shadow: var(--shadow-sm);
+        }
+        .kpi-card-label {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+        .kpi-card-val {
+            font-family: var(--font-heading);
+            font-size: 30px;
+            font-weight: 700;
+            color: var(--text);
+            line-height: 1.15;
+        }
+        .kpi-card-sub {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+        .panel {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-card);
+            padding: var(--sp-4);
+            margin-bottom: var(--sp-4);
+            box-shadow: var(--shadow-sm);
+        }
+        .panel-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: var(--sp-3);
+            padding-bottom: var(--sp-2);
+            border-bottom: 1px solid var(--border);
+        }
+        .panel-heading {
+            font-family: var(--font-heading);
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text);
+        }
+        .charts-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: var(--sp-3);
+            margin-bottom: var(--sp-4);
+        }
+        @media (max-width: 860px) {
+            .charts-row {
+                grid-template-columns: 1fr;
+            }
+        }
+        .chart-box {
+            position: relative;
+            height: 260px;
+            width: 100%;
+        }
+        /* Table responsiveness with internal scroll */
+        .table-wrap {
+            width: 100%;
+            overflow-x: auto;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+        }
+        table.data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            text-align: left;
+        }
+        table.data-table th,
+        table.data-table td {
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--border);
+            white-space: nowrap;
+        }
+        table.data-table th {
+            background: var(--bg);
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: var(--radius-pill);
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .badge-open {
+            background: #fef3c7;
+            color: #b45309;
+        }
+        .badge-resolved {
+            background: var(--success-bg);
+            color: var(--success);
+        }
+        .upload-dropzone {
+            border: 2px dashed var(--border-strong);
+            border-radius: var(--radius-card);
+            padding: var(--sp-5) var(--sp-4);
+            text-align: center;
+            background: var(--bg);
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .upload-dropzone:hover {
+            border-color: var(--accent);
+            background: var(--surface);
+        }
+    </style>
+</head>
+<body>
+    <!-- Admin Login Dialog (Active if not authenticated) -->
+    <div class="modal-backdrop" id="admin-login-modal" style="display: none;">
+        <div class="modal-card" style="max-width: 400px; text-align: center;">
+            <div style="margin-bottom: var(--sp-2); color: var(--accent);">
+                <svg class="icon icon-lg" style="width: 38px; height: 38px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                </svg>
+            </div>
+            <h2 class="modal-title" style="margin-bottom: 4px;">Admin Access</h2>
+            <p class="modal-intro">Please authenticate to enter the UniAssist administration portal.</p>
+            <div class="form-group" style="text-align: left;">
+                <label for="admin-pass">Password</label>
+                <input type="password" id="admin-pass" placeholder="Enter admin password" onkeydown="if(event.key==='Enter') verifyAdminLogin()">
+            </div>
+            <div id="login-error" class="modal-error" style="display: none;">Invalid credentials.</div>
+            <div class="modal-actions" style="justify-content: stretch;">
+                <button type="button" class="btn btn-accent" style="width: 100%;" onclick="verifyAdminLogin()">
+                    <span>Authenticate</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Admin Dashboard View -->
+    <div class="admin-wrap" id="admin-dashboard-wrap" style="display: none;">
+        <!-- Top Nav Header -->
+        <header class="admin-header">
+            <div class="admin-header-left">
+                <a href="/" class="brand" aria-label="UniAssist Home">
+                    <span class="brand-name">UniAssist</span>
+                </a>
+                <div>
+                    <h1 class="admin-title">Admin Management Portal</h1>
+                    <p class="admin-sub">Sample Institute of Technology (SIT)</p>
+                </div>
+            </div>
+            <div class="admin-header-actions">
+                <a href="/" class="btn btn-secondary" style="min-height: 38px; padding: 6px 14px; font-size: 13px; text-decoration: none;">
+                    <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                    </svg>
+                    <span>Student Chat</span>
+                </a>
+                <button class="icon-btn" id="admin-theme-toggle" aria-label="Toggle dark mode" title="Toggle theme">
+                    <svg class="icon icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="M4.93 4.93l1.41 1.41"/><path d="M17.66 17.66l1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="M6.34 17.66l-1.41 1.41"/><path d="M19.07 4.93l-1.41 1.41"/>
+                    </svg>
+                    <svg class="icon icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z"/>
+                    </svg>
+                </button>
+                <button type="button" class="btn btn-secondary" style="min-height: 38px; padding: 6px 14px; font-size: 13px;" onclick="logoutAdmin()">
+                    Logout
+                </button>
+            </div>
+        </header>
+
+        <!-- KPI Metrics Row -->
+        <section class="kpi-row" aria-label="Key Performance Indicators">
+            <div class="kpi-card">
+                <div class="kpi-card-label">Total Conversations</div>
+                <div class="kpi-card-val" id="kpi-chats">0</div>
+                <div class="kpi-card-sub">Student inquiries logged</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-card-label">Resolution Rate</div>
+                <div class="kpi-card-val" id="kpi-rate" style="color: var(--success);">0%</div>
+                <div class="kpi-card-sub" id="kpi-fallbacks">0 fallback events</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-card-label">Satisfaction Score</div>
+                <div class="kpi-card-val" id="kpi-satisfaction">0%</div>
+                <div class="kpi-card-sub" id="kpi-ratings-count">0 ratings recorded</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-card-label">Avg Pipeline Latency</div>
+                <div class="kpi-card-val" id="kpi-latency">0 ms</div>
+                <div class="kpi-card-sub">Search & answer generation</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-card-label">Open Support Tickets</div>
+                <div class="kpi-card-val" id="kpi-open-tickets" style="color: var(--accent);">0</div>
+                <div class="kpi-card-sub" id="kpi-resolved-tickets">0 resolved</div>
+            </div>
+        </section>
+
+        <!-- Analytics Visualizations -->
+        <div class="charts-row">
+            <div class="panel">
+                <div class="panel-top">
+                    <h2 class="panel-heading">Top Student Questions</h2>
+                </div>
+                <div class="chart-box">
+                    <canvas id="topics-canvas"></canvas>
+                </div>
+            </div>
+            <div class="panel">
+                <div class="panel-top">
+                    <h2 class="panel-heading">Student Feedback</h2>
+                </div>
+                <div class="chart-box">
+                    <canvas id="feedback-canvas"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Knowledge Base Management Panel -->
+        <div class="panel">
+            <div class="panel-top">
+                <h2 class="panel-heading">Knowledge Base Documents</h2>
+                <button type="button" class="btn btn-accent" id="reindex-btn" style="min-height: 38px; padding: 6px 16px; font-size: 13px;" onclick="triggerReindex()">
+                    <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+                    </svg>
+                    <span>Re-index Vector Base</span>
+                </button>
+            </div>
+            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: var(--sp-3);">
+                Upload new SIT policy documents (.md, .txt, .pdf, .docx) to expand the ChromaDB vector embeddings.
+            </p>
+            <div class="upload-dropzone" onclick="document.getElementById('file-upload-input').click()">
+                <input type="file" id="file-upload-input" style="display: none;" accept=".md,.txt,.pdf,.docx" onchange="handleAdminFileUpload(event)">
+                <div style="color: var(--accent); margin-bottom: var(--sp-2);">
+                    <svg class="icon icon-lg" style="width: 36px; height: 36px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+                    </svg>
+                </div>
+                <p style="font-weight: 600; color: var(--text);">Click or drag document here to upload</p>
+                <p style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">Supports Markdown, Plain Text, Adobe PDF, and Microsoft Word</p>
+            </div>
+            <div id="upload-status" style="margin-top: 10px; font-size: 13px;"></div>
+        </div>
+
+        <!-- Escalated Support Tickets Table -->
+        <div class="panel">
+            <div class="panel-top">
+                <h2 class="panel-heading">Escalated Support Tickets</h2>
+                <div style="display: flex; gap: var(--sp-1);">
+                    <button type="button" class="btn btn-secondary" style="min-height: 32px; padding: 4px 10px; font-size: 12px;" onclick="loadAdminTickets('all')">All</button>
+                    <button type="button" class="btn btn-secondary" style="min-height: 32px; padding: 4px 10px; font-size: 12px;" onclick="loadAdminTickets('open')">Open</button>
+                    <button type="button" class="btn btn-secondary" style="min-height: 32px; padding: 4px 10px; font-size: 12px;" onclick="loadAdminTickets('resolved')">Resolved</button>
+                </div>
+            </div>
+            <div class="table-wrap">
+                <table class="data-table" id="tickets-table">
+                    <thead>
+                        <tr>
+                            <th>Ticket ID</th>
+                            <th>Student</th>
+                            <th>Student ID</th>
+                            <th>Email (PII-Masked)</th>
+                            <th>Query Details</th>
+                            <th>Status</th>
+                            <th>Created</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tickets-tbody">
+                        <tr><td colspan="8" style="text-align: center; color: var(--text-muted);">Loading tickets...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Student Feedback Log Table -->
+        <div class="panel">
+            <div class="panel-top">
+                <h2 class="panel-heading">Recent Student Feedback</h2>
+                <button type="button" class="btn btn-secondary" style="min-height: 32px; padding: 4px 10px; font-size: 12px;" onclick="loadAdminFeedback()">Refresh</button>
+            </div>
+            <div class="table-wrap">
+                <table class="data-table" id="feedback-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Question</th>
+                            <th>Response Snippet</th>
+                            <th>Rating</th>
+                            <th>Timestamp</th>
+                        </tr>
+                    </thead>
+                    <tbody id="feedback-tbody">
+                        <tr><td colspan="5" style="text-align: center; color: var(--text-muted);">Loading feedback logs...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="admin-toast" class="toast" style="display: none;"></div>
+
+    <script>
+        let adminPass = sessionStorage.getItem('uniassist_admin_pass') || '';
+        let topicsChartInstance = null;
+        let feedbackChartInstance = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initAdminTheme();
+            if (adminPass) {
+                testAndLoadAdmin(adminPass);
+            } else {
+                document.getElementById('admin-login-modal').style.display = 'flex';
+                document.getElementById('admin-pass')?.focus();
+            }
+        });
+
+        function initAdminTheme() {
+            let savedTheme = 'light';
+            try {
+                savedTheme = localStorage.getItem('uniassist_theme') || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            } catch (e) {}
+            document.documentElement.setAttribute('data-theme', savedTheme);
+
+            const toggle = document.getElementById('admin-theme-toggle');
+            if (toggle) {
+                toggle.onclick = () => {
+                    const current = document.documentElement.getAttribute('data-theme') || 'light';
+                    const next = current === 'dark' ? 'light' : 'dark';
+                    document.documentElement.setAttribute('data-theme', next);
+                    try { localStorage.setItem('uniassist_theme', next); } catch (e) {}
+                    if (topicsChartInstance) renderChartsWithTheme();
+                };
+            }
+        }
+
+        async function verifyAdminLogin() {
+            const pass = document.getElementById('admin-pass')?.value.trim();
+            const errDiv = document.getElementById('login-error');
+            if (!pass) return;
+
+            try {
+                const res = await fetch('/api/admin/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password: pass }),
+                });
+
+                if (res.ok) {
+                    adminPass = pass;
+                    try { sessionStorage.setItem('uniassist_admin_pass', pass); } catch (e) {}
+                    document.getElementById('admin-login-modal').style.display = 'none';
+                    document.getElementById('admin-dashboard-wrap').style.display = 'block';
+                    loadDashboardData();
+                } else {
+                    if (errDiv) { errDiv.style.display = 'block'; errDiv.textContent = 'Invalid administrator password.'; }
+                }
+            } catch (e) {
+                if (errDiv) { errDiv.style.display = 'block'; errDiv.textContent = 'Connection error.'; }
+            }
+        }
+
+        async function testAndLoadAdmin(pass) {
+            try {
+                const res = await fetch('/api/admin/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password: pass }),
+                });
+                if (res.ok) {
+                    document.getElementById('admin-login-modal').style.display = 'none';
+                    document.getElementById('admin-dashboard-wrap').style.display = 'block';
+                    loadDashboardData();
+                } else {
+                    try { sessionStorage.removeItem('uniassist_admin_pass'); } catch (e) {}
+                    document.getElementById('admin-login-modal').style.display = 'flex';
+                }
+            } catch (e) {
+                document.getElementById('admin-login-modal').style.display = 'flex';
+            }
+        }
+
+        function logoutAdmin() {
+            try { sessionStorage.removeItem('uniassist_admin_pass'); } catch (e) {}
+            window.location.reload();
+        }
+
+        function loadDashboardData() {
+            loadAdminAnalytics();
+            loadAdminTickets();
+            loadAdminFeedback();
+        }
+
+        async function loadAdminAnalytics() {
+            try {
+                const res = await fetch('/api/admin/analytics', {
+                    headers: { 'X-Admin-Password': adminPass }
+                });
+                if (!res.ok) return;
+                const data = await res.json();
+
+                document.getElementById('kpi-chats').textContent = data.total_chats.toLocaleString();
+                document.getElementById('kpi-rate').textContent = data.answered_ratio + '%';
+                document.getElementById('kpi-fallbacks').textContent = `${data.total_fallbacks} fallback queries`;
+                document.getElementById('kpi-satisfaction').textContent = data.feedback_ratio + '%';
+                document.getElementById('kpi-ratings-count').textContent = `${data.thumbs_up + data.thumbs_down} total ratings`;
+                document.getElementById('kpi-latency').textContent = `${Math.round(data.avg_latency_ms)} ms`;
+                document.getElementById('kpi-open-tickets').textContent = data.open_tickets;
+                document.getElementById('kpi-resolved-tickets').textContent = `${data.resolved_tickets} resolved`;
+
+                renderCharts(data);
+            } catch (e) {
+                console.error('Analytics load error:', e);
+            }
+        }
+
+        let cachedAnalytics = null;
+
+        function renderCharts(data) {
+            cachedAnalytics = data;
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            const accentColor = isDark ? '#f97316' : '#c2410c';
+            const textColor = isDark ? '#f3ece4' : '#2b2420';
+            const gridColor = isDark ? '#3d332b' : '#e3d9cf';
+
+            // Topics Horizontal Bar Chart
+            const topicsCanvas = document.getElementById('topics-canvas');
+            if (topicsCanvas) {
+                const labels = data.top_questions.map(q => q.question.substring(0, 32) + (q.question.length > 32 ? '...' : ''));
+                const counts = data.top_questions.map(q => q.count);
+
+                if (topicsChartInstance) topicsChartInstance.destroy();
+                topicsChartInstance = new Chart(topicsCanvas, {
+                    type: 'bar',
+                    data: {
+                        labels: labels.length ? labels : ['No recorded queries'],
+                        datasets: [{
+                            label: 'Inquiry count',
+                            data: counts.length ? counts : [0],
+                            backgroundColor: accentColor,
+                            borderRadius: 6,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: { beginAtZero: true, ticks: { precision: 0, color: textColor }, grid: { color: gridColor } },
+                            x: { ticks: { color: textColor, autoSkip: false, maxRotation: 40 }, grid: { display: false } }
+                        }
+                    }
+                });
+            }
+
+            // Feedback Doughnut Chart
+            const feedbackCanvas = document.getElementById('feedback-canvas');
+            if (feedbackCanvas) {
+                if (feedbackChartInstance) feedbackChartInstance.destroy();
+                feedbackChartInstance = new Chart(feedbackCanvas, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Helpful', 'Not helpful'],
+                        datasets: [{
+                            data: [data.thumbs_up, data.thumbs_down],
+                            backgroundColor: ['#15803d', '#b91c1c'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'bottom', labels: { color: textColor } }
+                        }
+                    }
+                });
+            }
+        }
+
+        function renderChartsWithTheme() {
+            if (cachedAnalytics) renderCharts(cachedAnalytics);
+        }
+
+        async function loadAdminTickets(filter = 'all') {
+            const tbody = document.getElementById('tickets-tbody');
+            if (!tbody) return;
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: var(--text-muted);">Loading tickets...</td></tr>';
+
+            try {
+                let url = '/api/admin/tickets';
+                if (filter && filter !== 'all') url += `?status=${filter}`;
+                const res = await fetch(url, { headers: { 'X-Admin-Password': adminPass } });
+                if (!res.ok) return;
+                const tickets = await res.json();
+
+                if (tickets.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: var(--text-muted);">No tickets matching criteria.</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = tickets.map(t => `
+                    <tr>
+                        <td style="font-family: monospace; font-weight: 700; color: var(--accent);">${escapeHtml(t.ticket_id)}</td>
+                        <td>${escapeHtml(t.name)}</td>
+                        <td>${escapeHtml(t.student_id)}</td>
+                        <td>${escapeHtml(t.email)}</td>
+                        <td>${escapeHtml(t.query.substring(0, 50))}${t.query.length > 50 ? '...' : ''}</td>
+                        <td><span class="badge ${t.status === 'open' ? 'badge-open' : 'badge-resolved'}">${escapeHtml(t.status)}</span></td>
+                        <td>${new Date(t.created_at).toLocaleDateString()}</td>
+                        <td>
+                            ${t.status === 'open'
+                                ? `<button type="button" class="btn btn-accent" style="min-height: 28px; padding: 2px 10px; font-size: 11px;" onclick="resolveAdminTicket('${t.ticket_id}')">Resolve</button>`
+                                : `<span style="color: var(--success); font-weight: 600; font-size: 12px;">Resolved</span>`
+                            }
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (e) {
+                tbody.innerHTML = '<tr><td colspan="8" style="color: var(--danger); text-align: center;">Error loading tickets.</td></tr>';
+            }
+        }
+
+        async function resolveAdminTicket(ticketId) {
+            try {
+                const res = await fetch(`/api/admin/tickets/${ticketId}/resolve`, {
+                    method: 'POST',
+                    headers: { 'X-Admin-Password': adminPass }
+                });
+                if (res.ok) {
+                    loadAdminTickets();
+                    loadAdminAnalytics();
+                    showAdminToast(`Ticket ${ticketId} resolved`);
+                }
+            } catch (e) {
+                console.error('Resolve error:', e);
+            }
+        }
+
+        async function loadAdminFeedback() {
+            const tbody = document.getElementById('feedback-tbody');
+            if (!tbody) return;
+            try {
+                const res = await fetch('/api/admin/feedback', { headers: { 'X-Admin-Password': adminPass } });
+                if (!res.ok) return;
+                const items = await res.json();
+
+                if (items.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">No feedback logged yet.</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = items.map(f => `
+                    <tr>
+                        <td>#${f.id}</td>
+                        <td>${escapeHtml(f.question)}</td>
+                        <td>${escapeHtml(f.answer.substring(0, 75))}...</td>
+                        <td>
+                            <span class="badge ${f.rating === 'up' ? 'badge-resolved' : 'badge-open'}">
+                                ${f.rating === 'up' ? 'Helpful' : 'Not helpful'}
+                            </span>
+                        </td>
+                        <td>${new Date(f.created_at).toLocaleString()}</td>
+                    </tr>
+                `).join('');
+            } catch (e) {
+                tbody.innerHTML = '<tr><td colspan="5" style="color: var(--danger); text-align: center;">Error loading feedback.</td></tr>';
+            }
+        }
+
+        async function handleAdminFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const status = document.getElementById('upload-status');
+            status.style.color = 'var(--text-muted)';
+            status.textContent = `Uploading ${file.name}...`;
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const res = await fetch('/api/admin/upload', {
+                    method: 'POST',
+                    headers: { 'X-Admin-Password': adminPass },
+                    body: formData,
+                });
+
+                if (res.ok) {
+                    status.style.color = 'var(--success)';
+                    status.textContent = `Successfully uploaded ${file.name}. Click Re-index to rebuild vectors.`;
+                    showAdminToast('File uploaded successfully');
+                } else {
+                    const err = await res.json();
+                    status.style.color = 'var(--danger)';
+                    status.textContent = `Upload failed: ${err.detail || 'Error'}`;
+                }
+            } catch (e) {
+                status.style.color = 'var(--danger)';
+                status.textContent = 'Upload network error.';
+            }
+        }
+
+        async function triggerReindex() {
+            const btn = document.getElementById('reindex-btn');
+            const status = document.getElementById('upload-status');
+            btn.disabled = true;
+            btn.textContent = 'Indexing...';
+            status.style.color = 'var(--text-muted)';
+            status.textContent = 'Rebuilding vector embeddings in ChromaDB...';
+
+            try {
+                const res = await fetch('/api/admin/reindex', {
+                    method: 'POST',
+                    headers: { 'X-Admin-Password': adminPass }
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    status.style.color = 'var(--success)';
+                    status.textContent = `Re-indexing complete. ${data.chunks} document chunks indexed.`;
+                    showAdminToast('Knowledge Base re-indexed');
+                    loadAdminAnalytics();
+                } else {
+                    status.style.color = 'var(--danger)';
+                    status.textContent = 'Re-indexing failed.';
+                }
+            } catch (e) {
+                status.style.color = 'var(--danger)';
+                status.textContent = 'Connection error.';
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `
+                    <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+                    </svg>
+                    <span>Re-index Vector Base</span>
+                `;
+            }
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function showAdminToast(msg) {
+            const toast = document.getElementById('admin-toast');
+            if (!toast) return;
+            toast.textContent = msg;
+            toast.style.display = 'block';
+            setTimeout(() => { toast.style.display = 'none'; }, 2600);
+        }
+    </script>
+</body>
+</html>

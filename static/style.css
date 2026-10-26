@@ -1,0 +1,1149 @@
+/* ==========================================================================
+   UniAssist - "Ask First" Design System
+   Warm, calm, search-first interface with WCAG AA compliance
+   ========================================================================== */
+
+/* ── 1. Design Tokens & CSS Variables ───────────────────────────────────── */
+:root {
+    /* Colors - Light Theme (Warm Canvas) */
+    --bg: #faf6f1;
+    --surface: #ffffff;
+    --border: #e3d9cf;
+    --border-strong: #cdbfb2;
+    --text: #2b2420;
+    --text-muted: #5e5249;
+    --accent: #c2410c;
+    --accent-dark: #9a3412;
+    --accent-text: #ffffff;
+    --accent-subtle: #ffedd5;
+    
+    /* Message Bubbles */
+    --user-bubble: #c2410c;
+    --user-text: #ffffff;
+    --bot-bubble: #ffffff;
+    --bot-text: #2b2420;
+    
+    /* States */
+    --success: #15803d;
+    --success-bg: #f0fdf4;
+    --danger: #b91c1c;
+    --danger-bg: #fef2f2;
+    
+    /* Typography */
+    --font-heading: Georgia, 'Times New Roman', serif;
+    --font-body: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, 'Noto Sans Devanagari', sans-serif;
+    
+    /* Shapes & Radii */
+    --radius-btn: 12px;
+    --radius-card: 14px;
+    --radius-bar: 16px;
+    --radius-pill: 9999px;
+    --radius-sm: 8px;
+    
+    /* Spacing Scale */
+    --sp-1: 4px;
+    --sp-2: 8px;
+    --sp-3: 16px;
+    --sp-4: 24px;
+    --sp-5: 32px;
+    --sp-6: 48px;
+    
+    /* Elevation & Soft Shadows */
+    --shadow-sm: 0 1px 3px rgba(43, 36, 32, 0.05);
+    --shadow-md: 0 4px 14px rgba(43, 36, 32, 0.08);
+    --shadow-lg: 0 12px 32px rgba(43, 36, 32, 0.12);
+    --focus-ring: 0 0 0 3px rgba(194, 65, 12, 0.25);
+}
+
+[data-theme="dark"] {
+    /* Colors - Dark Theme (Warm Charcoal) */
+    --bg: #1c1714;
+    --surface: #272019;
+    --border: #3d332b;
+    --border-strong: #524439;
+    --text: #f3ece4;
+    --text-muted: #b8aa9c;
+    --accent: #f97316;
+    --accent-dark: #fdba74;
+    --accent-text: #1c1714;
+    --accent-subtle: #431407;
+    
+    /* Message Bubbles */
+    --user-bubble: #f97316;
+    --user-text: #1c1714;
+    --bot-bubble: #272019;
+    --bot-text: #f3ece4;
+    
+    /* States */
+    --success: #22c55e;
+    --success-bg: #052e16;
+    --danger: #ef4444;
+    --danger-bg: #450a0a;
+    
+    /* Elevation */
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.35);
+    --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.45);
+    --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.6);
+    --focus-ring: 0 0 0 3px rgba(249, 115, 22, 0.35);
+}
+
+/* ── 2. Global Resets & Base ────────────────────────────────────────────── */
+*, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    transition: background-color 0.25s ease, color 0.25s ease;
+    overflow-x: hidden;
+}
+
+a {
+    color: var(--accent);
+    text-decoration: underline;
+    transition: color 0.15s ease;
+}
+
+a:hover {
+    color: var(--accent-dark);
+}
+
+button {
+    font-family: inherit;
+    font-size: inherit;
+    border: none;
+    background: none;
+    cursor: pointer;
+    touch-action: manipulation;
+}
+
+input, textarea {
+    font-family: inherit;
+    font-size: inherit;
+    color: inherit;
+}
+
+:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+}
+
+/* ── 3. Layout Structure ────────────────────────────────────────────────── */
+.app-layout {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Top Bar: Exactly 64px */
+.top-bar {
+    height: 64px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    box-shadow: var(--shadow-sm);
+}
+
+.top-bar-inner {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 var(--sp-5);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.brand {
+    text-decoration: none;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+}
+
+.brand-name {
+    font-family: var(--font-heading);
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    color: var(--text);
+}
+
+.top-bar-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+}
+
+.main-content {
+    flex: 1;
+    width: 100%;
+    max-width: 820px;
+    margin: 0 auto;
+    padding: var(--sp-5) var(--sp-4) var(--sp-6);
+    display: flex;
+    flex-direction: column;
+}
+
+/* ── 4. Icons & Common Buttons ──────────────────────────────────────────── */
+.icon {
+    width: 20px;
+    height: 20px;
+    stroke: currentColor;
+    flex-shrink: 0;
+}
+
+.icon-sm {
+    width: 16px;
+    height: 16px;
+}
+
+.icon-lg {
+    width: 24px;
+    height: 24px;
+}
+
+/* Theme Toggle */
+.icon-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-pill);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    transition: background-color 0.2s, border-color 0.2s, transform 0.1s;
+}
+
+.icon-btn:hover {
+    background: var(--border);
+    transform: translateY(-1px);
+}
+
+.icon-btn:active {
+    transform: translateY(0);
+}
+
+.icon-btn-sm {
+    width: 34px;
+    height: 34px;
+    border-radius: var(--radius-sm);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    transition: all 0.15s ease;
+}
+
+.icon-btn-sm:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+}
+
+/* Sun/Moon visibility depending on theme */
+[data-theme="dark"] .icon-moon { display: none; }
+[data-theme="dark"] .icon-sun { display: block; }
+:root:not([data-theme="dark"]) .icon-moon { display: block; }
+:root:not([data-theme="dark"]) .icon-sun { display: none; }
+
+/* Buttons */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--sp-2);
+    min-height: 44px;
+    padding: 10px 20px;
+    font-size: 15px;
+    font-weight: 600;
+    border-radius: var(--radius-btn);
+    transition: all 0.15s ease;
+    cursor: pointer;
+}
+
+.btn-pill-outline {
+    min-height: 40px;
+    padding: 8px 18px;
+    border-radius: var(--radius-pill);
+    border: 1.5px solid var(--border-strong);
+    background: transparent;
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.15s ease;
+}
+
+.btn-pill-outline:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-subtle);
+}
+
+.btn-accent {
+    background: var(--accent);
+    color: var(--accent-text);
+}
+
+.btn-accent:hover {
+    background: var(--accent-dark);
+}
+
+.btn-secondary {
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border);
+}
+
+.btn-secondary:hover {
+    background: var(--border);
+}
+
+.link-btn {
+    color: var(--accent);
+    text-decoration: underline;
+    font-weight: 600;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 2px 4px;
+    font-size: inherit;
+}
+
+.link-btn:hover {
+    color: var(--accent-dark);
+}
+
+.ghost-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-muted);
+    border-radius: var(--radius-sm);
+    min-height: 36px;
+    transition: all 0.15s ease;
+}
+
+.ghost-btn:hover {
+    color: var(--text);
+    background: var(--border);
+}
+
+/* ── 5. Home State View (Search-First) ──────────────────────────────────── */
+.home-view {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding-top: var(--sp-4);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.hero-header {
+    margin-bottom: var(--sp-5);
+}
+
+.hero-title {
+    font-family: var(--font-heading);
+    font-size: 50px;
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -1px;
+    color: var(--text);
+    margin-bottom: var(--sp-2);
+}
+
+.hero-subtitle {
+    font-size: 18px;
+    color: var(--text-muted);
+    max-width: 540px;
+    margin: 0 auto;
+}
+
+/* Ask Bar Component (Warm, large, search-first) */
+.ask-bar {
+    width: 100%;
+    background: var(--surface);
+    border: 2px solid var(--accent);
+    border-radius: var(--radius-bar);
+    display: flex;
+    align-items: center;
+    padding: 6px 8px 6px 18px;
+    box-shadow: var(--shadow-md);
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.ask-bar:focus-within {
+    box-shadow: var(--focus-ring), var(--shadow-md);
+}
+
+.hero-ask-bar {
+    max-width: 760px;
+    margin-bottom: var(--sp-6);
+}
+
+.ask-bar-icon {
+    display: flex;
+    align-items: center;
+    color: var(--accent);
+    margin-right: 12px;
+}
+
+.ask-input {
+    flex: 1;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 18px;
+    color: var(--text);
+    min-height: 44px;
+}
+
+.ask-input::placeholder {
+    color: var(--text-muted);
+    opacity: 0.8;
+}
+
+.ask-btn {
+    flex-shrink: 0;
+    min-height: 44px;
+    padding: 0 24px;
+}
+
+/* Topic Cards Grid (3 col desktop, 2 col tablet, 1 col mobile) */
+.topic-grid {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--sp-3);
+    margin-bottom: var(--sp-5);
+}
+
+.topic-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card);
+    padding: var(--sp-4);
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-2);
+    min-height: 110px;
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.topic-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--accent);
+    box-shadow: var(--shadow-md);
+}
+
+.topic-card:active {
+    transform: translateY(0);
+}
+
+.topic-icon-wrap {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-sm);
+    background: var(--accent-subtle);
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 2px;
+}
+
+.topic-title {
+    font-family: var(--font-heading);
+    font-size: 17px;
+    font-weight: 700;
+    line-height: 1.25;
+    color: var(--text);
+}
+
+.topic-example {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.4;
+}
+
+.human-support-prompt {
+    font-size: 14px;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* ── 6. Conversation / Chat State ───────────────────────────────────────── */
+.chat-view {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    position: relative;
+    padding-bottom: 120px; /* Space for sticky composer */
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.message-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-4);
+    width: 100%;
+}
+
+/* Message Item */
+.message-row {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.message-row.user {
+    align-items: flex-end;
+}
+
+.message-row.bot {
+    align-items: flex-start;
+}
+
+/* Bubbles */
+.bubble {
+    padding: var(--sp-3) var(--sp-4);
+    font-size: 16px;
+    line-height: 1.6;
+    max-width: 82%;
+    word-break: break-word;
+    box-shadow: var(--shadow-sm);
+}
+
+.message-row.user .bubble {
+    background: var(--user-bubble);
+    color: var(--user-text);
+    border-radius: var(--radius-bar) var(--radius-bar) var(--radius-sm) var(--radius-bar);
+}
+
+.message-row.bot .bubble {
+    background: var(--bot-bubble);
+    color: var(--bot-text);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-bar) var(--radius-bar) var(--radius-bar) var(--radius-sm);
+}
+
+/* Markdown formatting inside Bot Bubble */
+.bubble h1, .bubble h2, .bubble h3, .bubble h4 {
+    font-family: var(--font-heading);
+    margin: var(--sp-3) 0 var(--sp-1);
+    line-height: 1.25;
+}
+
+.bubble h1 { font-size: 20px; }
+.bubble h2 { font-size: 18px; }
+.bubble h3 { font-size: 16px; }
+
+.bubble p {
+    margin-bottom: var(--sp-2);
+}
+
+.bubble p:last-child {
+    margin-bottom: 0;
+}
+
+.bubble ul, .bubble ol {
+    margin: var(--sp-2) 0;
+    padding-left: var(--sp-4);
+}
+
+.bubble li {
+    margin-bottom: 4px;
+}
+
+.bubble table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: var(--sp-3) 0;
+    font-size: 14px;
+}
+
+.bubble th, .bubble td {
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    text-align: left;
+}
+
+.bubble th {
+    background: var(--bg);
+    font-weight: 600;
+}
+
+.bubble code {
+    background: var(--border);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.bubble strong {
+    color: var(--accent);
+}
+
+/* Bot Message Metadata & Actions */
+.bot-meta-block {
+    margin-top: var(--sp-2);
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-2);
+    max-width: 82%;
+}
+
+/* Citations Row */
+.citations-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+}
+
+.citation-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.citation-chip svg {
+    color: var(--accent);
+}
+
+/* Actions Row: Copy + Thumbs Feedback */
+.actions-wrap {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+}
+
+.feedback-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 5px 10px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-muted);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    transition: all 0.15s ease;
+}
+
+.feedback-btn:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+}
+
+.feedback-btn.active-positive {
+    background: var(--success-bg);
+    border-color: var(--success);
+    color: var(--success);
+}
+
+.feedback-btn.active-negative {
+    background: var(--danger-bg);
+    border-color: var(--danger);
+    color: var(--danger);
+}
+
+.feedback-status-text {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--success);
+    margin-left: 4px;
+}
+
+/* Follow-up suggestions chips */
+.followups-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-2);
+    margin-top: 4px;
+}
+
+.followup-pill {
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    color: var(--accent);
+    padding: 6px 14px;
+    border-radius: var(--radius-pill);
+    font-size: 13px;
+    font-weight: 500;
+    text-align: left;
+    transition: all 0.15s ease;
+    cursor: pointer;
+}
+
+.followup-pill:hover {
+    background: var(--accent);
+    color: var(--accent-text);
+    border-color: var(--accent);
+}
+
+/* Fallback Card */
+.fallback-card {
+    background: var(--surface);
+    border: 1.5px dashed var(--border-strong);
+    border-radius: var(--radius-card);
+    padding: var(--sp-3) var(--sp-4);
+    margin-top: var(--sp-2);
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-2);
+}
+
+.fallback-card-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.fallback-card-desc {
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+/* Typing Indicator */
+.typing-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 10px;
+}
+
+.typing-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background-color: var(--text-muted);
+    animation: typingBounce 1.3s infinite ease-in-out;
+}
+
+.typing-dot:nth-child(2) { animation-delay: 0.15s; }
+.typing-dot:nth-child(3) { animation-delay: 0.3s; }
+
+@keyframes typingBounce {
+    0%, 60%, 100% { transform: translateY(0); }
+    30% { transform: translateY(-6px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .typing-dot {
+        animation: none;
+        opacity: 0.7;
+    }
+}
+
+/* Scroll to bottom button */
+.scroll-bottom-btn {
+    position: fixed;
+    right: max(20px, calc(50% - 410px + 20px));
+    bottom: 110px;
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-pill);
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    color: var(--accent);
+    box-shadow: var(--shadow-md);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 40;
+    cursor: pointer;
+    transition: transform 0.15s ease;
+}
+
+.scroll-bottom-btn:hover {
+    transform: translateY(-2px);
+}
+
+/* ── 7. Sticky Bottom Composer ──────────────────────────────────────────── */
+.bottom-composer-wrap {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(to top, var(--bg) 80%, transparent 100%);
+    padding: var(--sp-2) var(--sp-4) var(--sp-3);
+    z-index: 45;
+}
+
+.composer-container {
+    width: 100%;
+    max-width: 820px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-1);
+}
+
+.composer-toolbar {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-1);
+    padding-left: 4px;
+}
+
+.sticky-ask-bar {
+    align-items: flex-end;
+    padding: 6px 8px 6px 14px;
+}
+
+.ask-textarea {
+    flex: 1;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 16px;
+    color: var(--text);
+    resize: none;
+    max-height: 120px;
+    min-height: 38px;
+    padding: 6px 0;
+    line-height: 1.45;
+}
+
+.stop-btn {
+    min-height: 40px;
+    padding: 0 16px;
+    margin-right: 6px;
+    border-color: var(--danger);
+    color: var(--danger);
+}
+
+.stop-btn:hover {
+    background: var(--danger-bg);
+}
+
+/* ── 8. Escalation Modal Dialog ─────────────────────────────────────────── */
+.modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(28, 23, 20, 0.65);
+    backdrop-filter: blur(4px);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--sp-3);
+    animation: fadeIn 0.2s ease;
+}
+
+.modal-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card);
+    width: 100%;
+    max-width: 480px;
+    padding: var(--sp-5);
+    box-shadow: var(--shadow-lg);
+    outline: none;
+    animation: scaleIn 0.2s ease;
+}
+
+@keyframes scaleIn {
+    from { transform: scale(0.96); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--sp-3);
+}
+
+.modal-title {
+    font-family: var(--font-heading);
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.modal-close-btn {
+    width: 36px;
+    height: 36px;
+}
+
+.modal-intro {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-bottom: var(--sp-3);
+}
+
+.form-group {
+    margin-bottom: var(--sp-3);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.form-group label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.form-group .required {
+    color: var(--accent);
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    transition: border-color 0.15s ease;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    border-color: var(--accent);
+}
+
+.modal-error {
+    background: var(--danger-bg);
+    color: var(--danger);
+    border: 1px solid var(--danger);
+    border-radius: var(--radius-sm);
+    padding: 8px 12px;
+    font-size: 13px;
+    margin-bottom: var(--sp-3);
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--sp-2);
+    margin-top: var(--sp-4);
+}
+
+/* Success View inside Modal */
+.ticket-success-view {
+    text-align: center;
+    padding: var(--sp-3) 0;
+}
+
+.ticket-success-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: var(--radius-pill);
+    background: var(--success-bg);
+    color: var(--success);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: var(--sp-3);
+}
+
+.ticket-success-title {
+    font-family: var(--font-heading);
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: var(--sp-1);
+}
+
+.ticket-success-desc {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-bottom: var(--sp-4);
+}
+
+.ticket-id-box {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-2);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    padding: 8px 16px;
+    border-radius: var(--radius-sm);
+    margin-bottom: var(--sp-3);
+}
+
+.ticket-id-label {
+    font-size: 12px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+.ticket-id-value {
+    font-family: monospace;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--accent);
+}
+
+/* ── 9. Error Bubbles & Toast ───────────────────────────────────────────── */
+.error-bubble {
+    background: var(--danger-bg);
+    border: 1px solid var(--danger);
+    color: var(--danger);
+    border-radius: var(--radius-bar);
+    padding: var(--sp-3) var(--sp-4);
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-3);
+    max-width: 82%;
+}
+
+.toast {
+    position: fixed;
+    bottom: 90px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--text);
+    color: var(--bg);
+    padding: 10px 20px;
+    border-radius: var(--radius-pill);
+    font-size: 14px;
+    font-weight: 500;
+    z-index: 1000;
+    box-shadow: var(--shadow-lg);
+    animation: toastPop 0.2s ease;
+}
+
+@keyframes toastPop {
+    from { opacity: 0; transform: translate(-50%, 10px); }
+    to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+/* ── 10. Responsive Breakpoints ─────────────────────────────────────────── */
+
+/* Tablet (1024px and below) */
+@media (max-width: 1024px) {
+    .topic-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Small Tablet / Large Mobile (768px and below) */
+@media (max-width: 768px) {
+    .top-bar-inner {
+        padding: 0 var(--sp-3);
+    }
+
+    .main-content {
+        padding: var(--sp-4) var(--sp-3) var(--sp-6);
+    }
+
+    .hero-title {
+        font-size: 38px;
+    }
+
+    .hero-subtitle {
+        font-size: 16px;
+    }
+
+    .topic-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--sp-2);
+    }
+
+    .bubble {
+        max-width: 90%;
+    }
+
+    .bot-meta-block {
+        max-width: 90%;
+    }
+}
+
+/* Mobile (390px and below) */
+@media (max-width: 500px) {
+    .top-bar {
+        height: 60px;
+    }
+
+    .brand-name {
+        font-size: 20px;
+    }
+
+    .btn-pill-outline span {
+        display: none; /* Icon-only on small mobile */
+    }
+
+    .btn-pill-outline {
+        padding: 8px 12px;
+        min-height: 38px;
+    }
+
+    .hero-title {
+        font-size: 32px;
+    }
+
+    .hero-subtitle {
+        font-size: 15px;
+    }
+
+    .topic-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .ask-input {
+        font-size: 16px;
+    }
+
+    .ask-btn {
+        padding: 0 16px;
+    }
+
+    .bubble {
+        max-width: 95%;
+        font-size: 15px;
+    }
+
+    .bot-meta-block {
+        max-width: 95%;
+    }
+
+    .modal-card {
+        padding: var(--sp-4);
+    }
+}
