@@ -2,6 +2,16 @@
 > **Final Capstone Submission for HCLTech Digital-Data-AI Program**  
 > Institution Domain: Higher Education & Student Administration (Sample Institute of Technology - SIT)
 
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Render-brightgreen?style=for-the-badge&logo=render)](https://uniassist-chatbot-eyd6.onrender.com)
+[![Python 3.11](https://img.shields.io/badge/Python-3.11-blue?style=for-the-badge&logo=python)](https://python.org)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.115-teal?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com)
+[![ChromaDB](https://img.shields.io/badge/Vector%20DB-ChromaDB-orange?style=for-the-badge)](https://trychroma.com)
+
+**🚀 Live Application URL:** [https://uniassist-chatbot-eyd6.onrender.com](https://uniassist-chatbot-eyd6.onrender.com)  
+**🔐 Admin Intelligence Dashboard:** [https://uniassist-chatbot-eyd6.onrender.com/admin](https://uniassist-chatbot-eyd6.onrender.com/admin) *(Password: `admin123`)*  
+**📑 Swagger API Documentation:** [https://uniassist-chatbot-eyd6.onrender.com/docs](https://uniassist-chatbot-eyd6.onrender.com/docs)  
+**🩺 Health Diagnostics:** [https://uniassist-chatbot-eyd6.onrender.com/health](https://uniassist-chatbot-eyd6.onrender.com/health)
+
 UniAssist is a production-ready, full-stack conversational AI assistant engineered to streamline student inquiries, academic navigation, administrative processes, and grievance reporting at university scale. Built using an asynchronous Python/FastAPI architecture with ChromaDB vector search and xAI Grok LLM integration, it provides grounded, hallucination-resistant answers with citations, guardrails, conversation memory, human ticket escalation, and a real-time administrative intelligence dashboard.
 
 ---
@@ -135,12 +145,12 @@ chmod +x run.sh && ./run.sh
 
 ## 🌐 Application URLs
 
-| Portal | URL | Credentials / Notes |
-|---|---|---|
-| **Student Chat Interface** | `http://localhost:8000/` | Public access, mobile responsive |
-| **Admin Dashboard** | `http://localhost:8000/admin` | Password: `admin_sit_2024` (or configured value) |
-| **Interactive API Docs (Swagger)** | `http://localhost:8000/docs` | OpenAPI 3.0 specification |
-| **Health Check** | `http://localhost:8000/health` | Live diagnostic status |
+| Portal | Local URL | Live Cloud Production URL | Credentials / Notes |
+|---|---|---|---|
+| **Student Chat Interface** | `http://localhost:8000/` | **[https://uniassist-chatbot-eyd6.onrender.com/](https://uniassist-chatbot-eyd6.onrender.com/)** | Public access, mobile responsive |
+| **Admin Dashboard** | `http://localhost:8000/admin` | **[https://uniassist-chatbot-eyd6.onrender.com/admin](https://uniassist-chatbot-eyd6.onrender.com/admin)** | Password: `admin123` |
+| **Interactive API Docs (Swagger)** | `http://localhost:8000/docs` | **[https://uniassist-chatbot-eyd6.onrender.com/docs](https://uniassist-chatbot-eyd6.onrender.com/docs)** | OpenAPI 3.0 specification |
+| **Health Check** | `http://localhost:8000/health` | **[https://uniassist-chatbot-eyd6.onrender.com/health](https://uniassist-chatbot-eyd6.onrender.com/health)** | Live diagnostic status |
 
 ---
 

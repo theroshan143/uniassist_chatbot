@@ -9,10 +9,11 @@
    ```bash
    uvicorn app.main:app --port 8000
    ```
-3. Open browser windows:
-   - **Student Portal**: `http://localhost:8000/`
-   - **Admin Portal**: `http://localhost:8000/admin`
-   - **Swagger Docs**: `http://localhost:8000/docs`
+3. Open browser windows (Local or Live Cloud):
+   - **Live Production URL**: `https://uniassist-chatbot-eyd6.onrender.com/`
+   - **Live Admin Portal**: `https://uniassist-chatbot-eyd6.onrender.com/admin` (Password: `admin123`)
+   - **Live Swagger Docs**: `https://uniassist-chatbot-eyd6.onrender.com/docs`
+   - *(Or locally via `http://localhost:8000/`)*
 
 ---
 

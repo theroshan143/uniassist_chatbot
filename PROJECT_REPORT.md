@@ -8,6 +8,8 @@
 **Difficulty Level:** Intermediate  
 **Format:** Individual Project Submission  
 **Target Institution:** Sample Institute of Technology (SIT)  
+**Live Production URL:** https://uniassist-chatbot-eyd6.onrender.com  
+**GitHub Repository:** https://github.com/theroshan143/uniassist_chatbot  
 
 ---
 
