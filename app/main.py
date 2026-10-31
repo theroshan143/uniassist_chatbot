@@ -28,6 +28,7 @@ from app.llm import check_llm_health, detect_model, get_active_model
 from app.memory import memory_store
 from app.models import ChatLog, Feedback, Ticket
 from app.rag import get_index_count, ingest_documents
+from app.sentiment import analyze_sentiment, get_sentiment_summary
 from app.schemas import (
     AnalyticsResponse,
     ChatRequest,
@@ -81,7 +82,12 @@ async def lifespan(app: FastAPI):
     # Check knowledge base index
     count = get_index_count()
     if count == 0:
-        logger.warning("Knowledge base index is empty! Run: python scripts/ingest.py")
+        logger.info("Knowledge base index is empty. Running automatic initial ingestion...")
+        try:
+            count = ingest_documents()
+            logger.info(f"Knowledge base initialized successfully with {count} chunks.")
+        except Exception as e:
+            logger.error(f"Automatic ingestion failed: {e}")
     else:
         logger.info(f"Knowledge base: {count} indexed chunks")
 
@@ -381,6 +387,21 @@ async def admin_analytics(request: Request, db: Session = Depends(get_db)):
         resolved_tickets=resolved_tickets,
         top_questions=top_questions,
     )
+
+
+@app.get("/api/analytics/sentiment")
+async def get_sentiment_analytics(db: Session = Depends(get_db)):
+    """Compute sentiment distribution across recent user queries."""
+    recent_logs = (
+        db.query(ChatLog.question)
+        .order_by(ChatLog.created_at.desc())
+        .limit(100)
+        .all()
+    )
+    if not recent_logs:
+        return get_sentiment_summary([])
+    sentiments = [analyze_sentiment(log[0]) for log in recent_logs if log[0]]
+    return get_sentiment_summary(sentiments)
 
 
 @app.get("/api/admin/tickets")

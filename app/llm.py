@@ -61,15 +61,30 @@ def detect_model() -> str:
             logger.info(f"Using configured model: {_active_model}")
             return _active_model
 
-        # Find best grok or gemini model
-        preferred_models = sorted(
-            [m for m in available if "grok" in m.lower() or "gemini" in m.lower()],
-            key=lambda x: x,
-            reverse=True,
-        )
+        # Filter for standard text/chat models (exclude robotics, embedding, audio, bidi)
+        valid_chat_models = [
+            m for m in available
+            if ("grok" in m.lower() or "gemini" in m.lower())
+            and not any(bad in m.lower() for bad in ["robotics", "embedding", "bidi", "audio", "whisper", "imagen"])
+        ]
+        
+        # Prioritize fast, high-quality standard chat models
+        priority_order = [
+            "gemini-3.8-flash", "models/gemini-3.8-flash",
+            "gemini-2.0-flash", "models/gemini-2.0-flash",
+            "grok-4", "grok-beta", "grok-2",
+            "gemini-1.5-flash", "models/gemini-1.5-flash"
+        ]
+        
+        for p in priority_order:
+            for m in valid_chat_models:
+                if p in m:
+                    _active_model = m
+                    logger.info(f"Selected prioritized chat model: {_active_model}")
+                    return _active_model
 
-        if preferred_models:
-            _active_model = preferred_models[0]
+        if valid_chat_models:
+            _active_model = valid_chat_models[0]
             logger.info(
                 f"Configured model '{configured}' not in available list. "
                 f"Using best available: {_active_model}"

@@ -30,6 +30,7 @@ class ChatResponse(BaseModel):
     follow_ups: list[str] = []
     language: str = "en"
     chat_log_id: int | None = None
+    sentiment: Optional[dict] = None
 
 
 # ── Feedback ────────────────────────────────────────────────────────────────

@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: uniassist-chatbot
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    plan: free
+    autoDeploy: true
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: DEMO_MODE
+        value: "false"
+      - key: ADMIN_PASSWORD
+        value: admin123
+      - key: XAI_BASE_URL
+        value: https://generativelanguage.googleapis.com/v1beta/openai/
+      - key: XAI_API_KEY
+        sync: false
+      - key: XAI_MODEL
+        value: gemini-3.8-flash
+

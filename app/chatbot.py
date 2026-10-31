@@ -12,6 +12,7 @@ from app.llm import chat_completion, chat_completion_stream, get_active_model
 from app.memory import memory_store
 from app.rag import retrieve
 from app.schemas import ChatResponse, SourceInfo
+from app.sentiment import analyze_sentiment
 
 logger = logging.getLogger("uniassist.chatbot")
 
@@ -197,6 +198,7 @@ def process_message(
     start = time.time()
 
     # 1. Guardrails
+    sentiment_res = analyze_sentiment(message)
     guard = run_guardrails(message)
     if not guard.passed:
         latency = (time.time() - start) * 1000
@@ -206,6 +208,7 @@ def process_message(
             is_fallback=True,
             follow_ups=["What are the admission requirements?", "Tell me about fee structure", "How do I contact the support team?"],
             language=_detect_language(message),
+            sentiment=sentiment_res,
         )
 
     # 2. Language detection
@@ -231,6 +234,7 @@ def process_message(
                 "How do I apply for hostel?",
             ],
             language=language,
+            sentiment=sentiment_res,
         )
 
     # 3. Get conversation history and rewrite follow-ups
@@ -296,11 +300,19 @@ def process_message(
             answer = chat_completion(messages)
         except Exception as e:
             logger.error(f"LLM call failed: {e}")
-            answer = (
-                "I'm sorry, I'm having trouble processing your request right now. "
-                "Please try again in a moment, or click 'Talk to Human' to create a support ticket."
-            )
-            is_fallback = True
+            if chunks and not is_fallback:
+                # Resilient fallback: ground directly in retrieved ChromaDB chunks
+                logger.info("Falling back to grounded vector context direct response")
+                answer = "Based on official SIT university records:\n\n"
+                for chunk in chunks[:2]:
+                    meta = chunk["metadata"]
+                    answer += f"**{meta.get('title', 'SIT Policy')} — {meta.get('section', 'General')}**:\n{chunk['text'].strip()}\n\n"
+            else:
+                answer = (
+                    "I'm sorry, I'm having trouble processing your request right now. "
+                    "Please try again in a moment, or click 'Talk to Human' to create a support ticket."
+                )
+                is_fallback = True
 
     # 8. Store in memory
     memory_store.add_turn(session_id, message, answer)
@@ -316,6 +328,7 @@ def process_message(
         is_fallback=is_fallback,
         follow_ups=follow_ups,
         language=language,
+        sentiment=sentiment_res,
     )
 
 
@@ -333,6 +346,7 @@ def process_message_stream(
     start = time.time()
 
     # 1. Guardrails
+    sentiment_res = analyze_sentiment(message)
     guard = run_guardrails(message)
     if not guard.passed:
         yield {"event": "token", "data": guard.response}
@@ -344,6 +358,7 @@ def process_message_stream(
                 "follow_ups": ["What are the admission requirements?", "Tell me about fee structure", "How do I contact the support team?"],
                 "language": _detect_language(message),
                 "latency_ms": (time.time() - start) * 1000,
+                "sentiment": sentiment_res,
             },
         }
         yield {"event": "done", "data": ""}
@@ -374,6 +389,7 @@ def process_message_stream(
                 ],
                 "language": language,
                 "latency_ms": (time.time() - start) * 1000,
+                "sentiment": sentiment_res,
             },
         }
         yield {"event": "done", "data": ""}
@@ -422,6 +438,7 @@ def process_message_stream(
                 "follow_ups": _generate_follow_ups(demo_answer, chunks),
                 "language": language,
                 "latency_ms": (time.time() - start) * 1000,
+                "sentiment": sentiment_res,
             },
         }
         yield {"event": "done", "data": ""}
@@ -447,10 +464,18 @@ def process_message_stream(
             yield {"event": "token", "data": token}
     except Exception as e:
         logger.error(f"Stream error: {e}")
-        error_msg = "I'm sorry, I'm having trouble right now. Please try again."
-        full_answer = error_msg
-        yield {"event": "token", "data": error_msg}
-        is_fallback = True
+        if chunks and not is_fallback:
+            resilient_msg = "Based on official SIT university records:\n\n"
+            for chunk in chunks[:2]:
+                meta = chunk["metadata"]
+                resilient_msg += f"**{meta.get('title', 'SIT Policy')} — {meta.get('section', 'General')}**:\n{chunk['text'].strip()}\n\n"
+            full_answer = resilient_msg
+            yield {"event": "token", "data": resilient_msg}
+        else:
+            error_msg = "I'm sorry, I'm having trouble right now. Please try again or contact support."
+            full_answer = error_msg
+            yield {"event": "token", "data": error_msg}
+            is_fallback = True
 
     # Send sources and metadata
     yield {"event": "sources", "data": sources if not is_fallback else []}

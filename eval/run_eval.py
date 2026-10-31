@@ -118,6 +118,7 @@ def run_evaluation():
             "latency_ms": round(latency_ms, 1),
             "passed": is_pass,
         })
+        time.sleep(0.5)
 
     avg_latency = total_latency_ms / len(questions) if questions else 0
     accuracy = (passed_count / len(questions)) * 100 if questions else 0
