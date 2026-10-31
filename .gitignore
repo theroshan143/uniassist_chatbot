@@ -15,12 +15,9 @@ build/
 .pytest_cache/
 
 # Virtual environment
-venv/
 .venv/
+venv/
 env/
-
-# ChromaDB
-chroma_db/
 
 # SQLite
 *.db

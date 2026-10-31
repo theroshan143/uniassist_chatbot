@@ -25,6 +25,7 @@ COPY data/ data/
 COPY static/ static/
 COPY scripts/ scripts/
 COPY eda/ eda/
+COPY chroma_db/ chroma_db/
 
 # Expose web port
 EXPOSE 8000
@@ -33,6 +34,6 @@ EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
     CMD curl -f http://localhost:${PORT:-8000}/health || exit 1
 
-# Launch ASGI server dynamically binding to $PORT
-CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
+# Launch ASGI server dynamically binding to $PORT with low memory worker
+CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000} --workers 1"]
 
