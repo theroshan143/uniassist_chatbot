@@ -1,5 +1,13 @@
 """FastAPI main application – routes, static serving, startup checks."""
 
+# Ensure ChromaDB compatibility with SQLite on Linux hosts
+try:
+    __import__("pysqlite3")
+    import sys
+    sys.modules["sqlite3"] = sys.modules.pop("pysqlite3")
+except (ImportError, KeyError):
+    pass
+
 import json
 import logging
 import os
